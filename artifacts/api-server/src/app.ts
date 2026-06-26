@@ -7,6 +7,8 @@ import router from "./routes";
 import { logger } from "./lib/logger";
 import { pool } from "@workspace/db";
 import { tokenAuthMiddleware } from "./middlewares/tokenAuth";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app: Express = express();
 
@@ -73,5 +75,14 @@ app.use(
 app.use(tokenAuthMiddleware);
 
 app.use("/api", router);
+
+if (process.env.NODE_ENV === "production") {
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const frontendPath = path.resolve(__dirname, "../../../artifacts/game-shop/dist/public");
+  app.use(express.static(frontendPath));
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(frontendPath, "index.html"));
+  });
+}
 
 export default app;
