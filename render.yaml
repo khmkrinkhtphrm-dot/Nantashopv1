@@ -15,8 +15,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000
       - key: PNPM_VERSION
         value: 10.26.1
       - key: DATABASE_URL
@@ -25,4 +23,3 @@ services:
           property: connectionString
       - key: SESSION_SECRET
         generateValue: true
-    healthCheckPath: /api/healthz
