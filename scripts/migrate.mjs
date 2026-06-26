@@ -3,7 +3,14 @@ import pg from "pg";
 
   const { Pool } = pg;
 
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const dbUrl = process.env.DATABASE_URL;
+  const isLocalhost =
+    dbUrl && (dbUrl.includes("localhost") || dbUrl.includes("127.0.0.1"));
+
+  const pool = new Pool({
+    connectionString: dbUrl,
+    ssl: isLocalhost ? false : { rejectUnauthorized: false },
+  });
 
   const sql = `
   CREATE EXTENSION IF NOT EXISTS "pgcrypto";
