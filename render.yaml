@@ -11,7 +11,7 @@ services:
     runtime: node
     rootDir: .
     buildCommand: pnpm install --no-frozen-lockfile && pnpm --filter @workspace/game-shop run build && pnpm --filter @workspace/api-server run build
-    startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
+    startCommand: sh scripts/start.sh
     envVars:
       - key: NODE_ENV
         value: production
