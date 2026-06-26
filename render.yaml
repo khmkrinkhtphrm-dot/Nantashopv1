@@ -25,12 +25,10 @@ services:
         generateValue: true
     healthCheckPath: /api/healthz
 
-  - type: web
+  - type: static
     name: nantashop-frontend
-    plan: free
-    runtime: static
     rootDir: .
-    buildCommand: npm install -g pnpm && pnpm install --frozen-lockfile && PORT=3000 BASE_PATH=/ VITE_API_URL=https://nantashop-api.onrender.com pnpm --filter @workspace/game-shop run build
+    buildCommand: npm install -g pnpm && pnpm install --frozen-lockfile && PORT=3000 BASE_PATH=/ pnpm --filter @workspace/game-shop run build
     staticPublishPath: artifacts/game-shop/dist/public
     envVars:
       - key: VITE_API_URL
