@@ -1,5 +1,4 @@
 import pg from "pg";
-  import bcrypt from "bcryptjs";
 
   const { Pool } = pg;
 
@@ -191,37 +190,18 @@ import pg from "pg";
   ) WITH (OIDS=FALSE);
 
   CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire");
-  `;
 
-  async function seedAdmin() {
-    console.log("Checking admin user...");
-    try {
-      const existing = await pool.query(
-        "SELECT id FROM users WHERE username = 'admin' LIMIT 1"
-      );
-      if (existing.rows.length === 0) {
-        const hash = await bcrypt.hash("admin123", 10);
-        await pool.query(
-          `INSERT INTO users (username, password_hash, is_admin, balance, total_topup)
-           VALUES ('admin', $1, true, 0, 0)`,
-          [hash]
-        );
-        console.log("Admin user created successfully (username: admin, password: admin123)");
-      } else {
-        console.log("Admin user already exists.");
-      }
-    } catch (err) {
-      console.error("Failed to seed admin user:", err.message);
-      throw err;
-    }
-  }
+  -- Seed admin user using pgcrypto bcrypt (compatible with bcryptjs)
+  INSERT INTO users (username, password_hash, is_admin, balance, total_topup)
+  SELECT 'admin', crypt('admin123', gen_salt('bf', 10)), true, 0, 0
+  WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'admin');
+  `;
 
   async function migrate() {
     console.log("Running database migration...");
     try {
       await pool.query(sql);
-      console.log("Migration complete!");
-      await seedAdmin();
+      console.log("Migration and admin seed complete!");
     } catch (err) {
       console.error("Migration failed:", err.message);
       process.exit(1);
