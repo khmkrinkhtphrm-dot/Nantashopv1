@@ -1,0 +1,41 @@
+databases:
+  - name: nantashop-db
+    databaseName: nantashop
+    user: nanta
+    plan: free
+
+services:
+  - type: web
+    name: nantashop-api
+    plan: free
+    runtime: node
+    rootDir: .
+    buildCommand: npm install -g pnpm && pnpm install --frozen-lockfile && pnpm --filter @workspace/api-server run build
+    startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nantashop-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+    healthCheckPath: /api/healthz
+
+  - type: web
+    name: nantashop-frontend
+    plan: free
+    runtime: static
+    rootDir: .
+    buildCommand: npm install -g pnpm && pnpm install --frozen-lockfile && PORT=3000 BASE_PATH=/ VITE_API_URL=https://nantashop-api.onrender.com pnpm --filter @workspace/game-shop run build
+    staticPublishPath: artifacts/game-shop/dist/public
+    envVars:
+      - key: VITE_API_URL
+        value: https://nantashop-api.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
